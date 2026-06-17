@@ -28,7 +28,7 @@ Proyek ini dibangun dan dikembangkan berdasarkan referensi utama dari buku:
 
 Pastikan Python telah terinstal di sistem Anda (direkomendasikan Python 3.8+). Anda memerlukan pustaka berikut:
 - `numpy`
-- `opencv-python`
+- `opencv-python-headless`
 - `matplotlib`
 - `streamlit>=1.32`
 

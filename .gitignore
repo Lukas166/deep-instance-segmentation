@@ -218,3 +218,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# models zip file (cause size too big and already downloaded from url)
+models/*.tar.gz

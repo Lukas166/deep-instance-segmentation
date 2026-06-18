@@ -61,21 +61,21 @@ Pastikan Python telah terinstal di sistem Anda (direkomendasikan Python 3.8+). A
 
 ## Struktur Direktori
 
-```
+```text
 deep-instance-segmentation/
-|-- .gitignore
-|-- README.md
-|-- app.py
-|-- rcnn_segmentation.py
-|-- requirements.txt
-|-- images/
-|   `-- image_placeholder.png
-|-- models/
-|   |-- frozen_inference_graph.pb
-|   |-- mask_rcnn_inception_v2_coco_2018_01_28.pbtxt
-|   `-- object_detection_classes_coco.txt
-`-- utils/
-    `-- download_models.py
+├── .gitignore
+├── README.md
+├── app.py
+├── rcnn_segmentation.py
+├── requirements.txt
+├── images/
+│   └── image_placeholder.png
+├── models/
+│   ├── frozen_inference_graph.pb
+│   ├── mask_rcnn_inception_v2_coco_2018_01_28.pbtxt
+│   └── object_detection_classes_coco.txt
+└── utils/
+    └── download_models.py
 ```
 
 Keterangan file utama:

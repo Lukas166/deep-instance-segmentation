@@ -2,6 +2,7 @@ import cv2
 import streamlit as st
 
 from rcnn_segmentation import (
+    DEFAULT_MAX_IMAGE_DIMENSION,
     bgr_to_rgb,
     load_default_model,
     read_image_from_bytes,
@@ -235,7 +236,8 @@ def main():
                 net=net,
                 labels=labels,
                 conf=0.5,
-                thresh=0.3
+                thresh=0.3,
+                max_dimension=DEFAULT_MAX_IMAGE_DIMENSION
             )
             status_placeholder.info("Langkah 3/3 - Menggambar mask dan bounding box...")
         except Exception as error:
@@ -248,6 +250,14 @@ def main():
 
     # Caption sumber gambar
     st.caption(f"Input: `{image_source}`")
+
+    if result.resized:
+        st.info(
+            "Gambar otomatis diperkecil dari "
+            f"{result.original_size[0]}x{result.original_size[1]} menjadi "
+            f"{result.processed_size[0]}x{result.processed_size[1]} piksel "
+            "agar inferensi Mask R-CNN tetap stabil."
+        )
 
     # Metrics
     unique_labels = len(set(d["label"] for d in result.detections)) if result.detections else 0

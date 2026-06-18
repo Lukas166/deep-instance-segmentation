@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional, Tuple
 import colorsys
 import random
 import time
@@ -7,6 +8,8 @@ import time
 import cv2
 import matplotlib.pylab as plt
 import numpy as np
+
+DEFAULT_MAX_IMAGE_DIMENSION = 1200
 
 @dataclass
 class SegmentationResult:
@@ -16,6 +19,9 @@ class SegmentationResult:
     num_classes: int
     num_detections: int
     elapsed_time: float
+    resized: bool = False
+    original_size: Optional[Tuple[int, int]] = None
+    processed_size: Optional[Tuple[int, int]] = None
 
 def random_colors(N, bright=True):
     brightness = 1.0 if bright else 0.7
@@ -74,6 +80,20 @@ def read_image_from_bytes(file_bytes):
 def bgr_to_rgb(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
+def resize_for_inference(image, max_dimension=DEFAULT_MAX_IMAGE_DIMENSION):
+    h, w = image.shape[:2]
+    largest_dimension = max(h, w)
+
+    if largest_dimension <= max_dimension:
+        return image, False, (w, h), (w, h)
+
+    scale = max_dimension / largest_dimension
+    new_w = max(1, int(w * scale))
+    new_h = max(1, int(h * scale))
+    resized_image = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+    return resized_image, True, (w, h), (new_w, new_h)
+
 def get_label(labels, class_id):
     if class_id < len(labels):
         return labels[class_id]
@@ -85,7 +105,19 @@ def get_label(labels, class_id):
 
     return f"class_{class_id}"
 
-def run_instance_segmentation(image, net, labels, conf=0.5, thresh=0.3):
+def run_instance_segmentation(
+    image,
+    net,
+    labels,
+    conf=0.5,
+    thresh=0.3,
+    max_dimension=DEFAULT_MAX_IMAGE_DIMENSION
+):
+    image, resized, original_size, processed_size = resize_for_inference(
+        image,
+        max_dimension=max_dimension
+    )
+
     original_image = image.copy()
     segmented_image = image.copy()
 
@@ -214,7 +246,10 @@ def run_instance_segmentation(image, net, labels, conf=0.5, thresh=0.3):
         detections=detections,
         num_classes=int(num_classes),
         num_detections=int(num_detections),
-        elapsed_time=float(elapsed_time)
+        elapsed_time=float(elapsed_time),
+        resized=resized,
+        original_size=original_size,
+        processed_size=processed_size
     )
 
 def show_comparison(original_image, segmented_image):

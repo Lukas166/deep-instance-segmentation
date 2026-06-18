@@ -287,4 +287,5 @@ def main():
         result.segmented_image
     )
 
-main()
+if __name__ == "__main__":
+    main()

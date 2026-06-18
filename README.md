@@ -23,10 +23,13 @@ Proyek ini dibangun dan dikembangkan berdasarkan referensi utama dari buku:
 - **OpenCV DNN Module**: Inferensi model dijalankan menggunakan modul OpenCV DNN, tanpa memerlukan instalasi *heavy-framework* seperti TensorFlow atau PyTorch. Proses inferensi dapat berjalan efisien di CPU.
 - **Visualisasi Alur Pemrosesan (Pipeline)**: Aplikasi ini secara transparan menampilkan tahapan proses dari gambar input, deteksi *bounding box* (sebelum *masking*), hingga output akhir yang telah diberi *mask* dan *blend* warna.
 - **Informasi Objek Terdeteksi**: Menampilkan metrik utama seperti jumlah objek yang terdeteksi, jumlah kelas unik, waktu inferensi, dan tabel detail mengenai label beserta *confidence score*.
+- **Upload Gambar Lokal**: Mendukung file gambar berformat PNG, JPG, JPEG, BMP, dan WEBP. Jika tidak ada file yang diunggah, aplikasi menggunakan gambar placeholder dari direktori `images/`.
+- **Resize Otomatis untuk Inferensi**: Gambar dengan sisi terpanjang lebih dari 1200 piksel akan diperkecil otomatis agar proses inferensi lebih stabil.
 
 ## Persyaratan Sistem (Prerequisites)
 
 Pastikan Python telah terinstal di sistem Anda (direkomendasikan Python 3.8+). Anda memerlukan pustaka berikut:
+
 - `numpy`
 - `opencv-python-headless`
 - `matplotlib`
@@ -60,12 +63,32 @@ Pastikan Python telah terinstal di sistem Anda (direkomendasikan Python 3.8+). A
 
 ```
 deep-instance-segmentation/
-├── app.py                      # File utama aplikasi Streamlit
-├── requirements.txt            # Daftar pustaka Python yang dibutuhkan
-├── README.md                   # Dokumentasi proyek (file ini)
-├── images/                     # Direktori untuk gambar contoh (placeholder)
-├── models/                     # Tempat model dan label yang telah diunduh
-└── utils/                      # Modul utilitas
-    ├── rcnn_segmentation.py    # Logika inferensi Mask R-CNN dan pemrosesan gambar
-    └── download_models.py      # Skrip otomatis untuk mengunduh model OpenCV DNN
+|-- .gitignore
+|-- README.md
+|-- app.py
+|-- rcnn_segmentation.py
+|-- requirements.txt
+|-- images/
+|   `-- image_placeholder.png
+|-- models/
+|   |-- frozen_inference_graph.pb
+|   |-- mask_rcnn_inception_v2_coco_2018_01_28.pbtxt
+|   `-- object_detection_classes_coco.txt
+`-- utils/
+    `-- download_models.py
 ```
+
+Keterangan file utama:
+
+- `app.py`: File utama aplikasi Streamlit, termasuk tampilan, upload gambar, metrik hasil deteksi, pipeline visual, dan tabel objek terdeteksi.
+- `rcnn_segmentation.py`: Modul inferensi Mask R-CNN, mulai dari pembacaan model, pembacaan gambar, resize otomatis, forward pass OpenCV DNN, hingga post-processing mask dan bounding box.
+- `utils/download_models.py`: Skrip untuk mengunduh ulang model pretrained, file konfigurasi OpenCV DNN, dan label kelas COCO.
+- `models/`: Direktori berisi file model yang dibutuhkan aplikasi.
+- `images/image_placeholder.png`: Gambar bawaan yang dipakai ketika pengguna belum mengunggah gambar.
+- `requirements.txt`: Daftar dependensi Python yang dibutuhkan untuk menjalankan aplikasi.
+
+## Catatan Implementasi
+
+- Model dimuat menggunakan `cv2.dnn.readNetFromTensorflow()` dari file `models/frozen_inference_graph.pb` dan `models/mask_rcnn_inception_v2_coco_2018_01_28.pbtxt`.
+- Threshold yang digunakan aplikasi adalah `confidence >= 0.5` untuk deteksi objek dan `mask > 0.3` untuk segmentasi piksel.
+- Aplikasi menampilkan 100 kandidat deteksi dari forward pass model, lalu hanya menampilkan objek yang lolos filter confidence.
